@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: furniture_db
+      MYSQL_USER: furniture
+      MYSQL_PASSWORD: furniture_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  api:
+    build: .
+    volumes:
+      - ./:/app
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: mysql+pymysql://furniture:furniture_pass@db:3306/furniture_db
+    depends_on:
+      - db
+
+volumes:
+  db_data:

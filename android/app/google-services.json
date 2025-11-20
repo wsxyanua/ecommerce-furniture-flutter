@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "999059083378",
+    "firebase_url": "https://flutter-project-e3817-default-rtdb.firebaseio.com",
+    "project_id": "flutter-project-e3817",
+    "storage_bucket": "flutter-project-e3817.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:999059083378:android:639414d74757df0d40b2eb",
+        "android_client_info": {
+          "package_name": "hcmute.edu.vn.final_project_funiture_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "999059083378-r83ha5ev6g0g49tioka6hn0c6mg297fb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLtdiS1Wz3Q7jNLpDlXhKZa8WR_ovPaE8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "999059083378-r83ha5ev6g0g49tioka6hn0c6mg297fb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:999059083378:android:48e7c73bddc01e1940b2eb",
+        "android_client_info": {
+          "package_name": "hcmute.edu.vn.furniture_app_project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "999059083378-r83ha5ev6g0g49tioka6hn0c6mg297fb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLtdiS1Wz3Q7jNLpDlXhKZa8WR_ovPaE8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "999059083378-r83ha5ev6g0g49tioka6hn0c6mg297fb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
