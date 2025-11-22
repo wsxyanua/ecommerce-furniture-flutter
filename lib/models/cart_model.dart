@@ -30,7 +30,7 @@ class Cart extends Equatable{
 
   factory Cart.fromJson(Map<String, dynamic> json) {
     return Cart(
-      idCart: json['idCart'] as int?,
+      idCart: json['id'] as int? ?? json['idCart'] as int?,
       imgProduct: json['img'] ?? json['imgProduct'] ?? '',
       nameProduct: json['name'] ?? json['nameProduct'] ?? '',
       color: json['color'] ?? '',

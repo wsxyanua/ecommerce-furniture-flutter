@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:furniture_app_project/provider/user_provider.dart';
 import '../models/order_model.dart';
 import '../provider/country_city_provider.dart';
+import '../provider/cart_provider.dart';
 import '../screens/result/result_order.dart';
 import '../services/DatabaseHandler.dart';
 import 'package:flutter/material.dart';
@@ -20,14 +21,13 @@ UserProvider userProvider = UserProvider();
 CountryCityProvider countryCityProvider = CountryCityProvider();
 
 class _CheckoutPageState extends State<CheckoutPage> {
-  late DatabaseHandler handler;
   late List<Cart> listCart;
   late List<UserSQ> currentUser;
 
   @override
   void initState() {
     super.initState();
-    handler = DatabaseHandler();
+    final handler = DatabaseHandler();
     currentUser = handler.getListUser;
   }
 
@@ -156,7 +156,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     countryCityProvider.getListCountry();
     listCountry = countryCityProvider.getCountryCityList;
-    listCart = handler.getListCart;
+    final cartProvider = Provider.of<CartProvider>(context);
+    listCart = cartProvider.cartItems;
+    final handler = DatabaseHandler();
     currentUser = handler.getListUser;
 
     return Scaffold(

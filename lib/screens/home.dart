@@ -17,7 +17,8 @@ import 'package:badges/badges.dart' as badges;
 import 'package:provider/provider.dart';
 import '../models/favorite_model.dart';
 import '../models/product_model.dart';
-import '../services/DatabaseHandler.dart';
+import '../provider/cart_provider.dart';
+import '../provider/favorite_provider.dart';
 import '../widgets/category_list.dart';
 import '../widgets/search.dart';
 
@@ -34,10 +35,6 @@ ProductProvider productProvider = ProductProvider();
 UserProvider userProvider = UserProvider();
 
 class _HomePageState extends State<HomePage> {
-  late DatabaseHandler handler;
-
-  late List<Favorite> listFavorite;
-  late List<Cart> listCart;
   late Favorite favorite;
 
   int cartBadgeAmount = 0;
@@ -65,8 +62,11 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    handler = DatabaseHandler();
     getCallAllFunction();
+    Future.microtask(() {
+      Provider.of<CartProvider>(context, listen: false).init();
+      Provider.of<FavoriteProvider>(context, listen: false).init();
+    });
   }
 
   bool isSettingOpen = false;
@@ -80,6 +80,8 @@ class _HomePageState extends State<HomePage> {
     categoryProvider = Provider.of<CategoryProvider>(context);
     productProvider = Provider.of<ProductProvider>(context);
     userProvider = Provider.of<UserProvider>(context);
+    final cartProvider = Provider.of<CartProvider>(context);
+    final favoriteProvider = Provider.of<FavoriteProvider>(context);
 
     height = MediaQuery.of(context).size.height;
     width = MediaQuery.of(context).size.width;
@@ -87,12 +89,8 @@ class _HomePageState extends State<HomePage> {
     getCallAllFunction();
 
     setState(() {
-      int cartAmount = handler.getListCart.length;
-      int favoriteAmount = handler.getListFavorite.length;
-      cartBadgeAmount = cartAmount;
-      favoriteBadgeAmount = favoriteAmount;
-      listFavorite = handler.getListFavorite;
-      listCart = handler.getListCart;
+      cartBadgeAmount = cartProvider.cartItems.length;
+      favoriteBadgeAmount = favoriteProvider.favorites.length;
     });
 
     showCartBadge = cartBadgeAmount > 0;
@@ -613,7 +611,8 @@ class _HomePageState extends State<HomePage> {
                                                 element.productItemList[0].id,
                                             price: element.currentPrice);
 
-                                        handler.insertCart(cart);
+                                        final cartProvider = Provider.of<CartProvider>(context, listen: false);
+                                        cartProvider.addToCart(cart);
                                       },
                                       child: Container(
                                         alignment: Alignment.center,
@@ -897,7 +896,8 @@ class _HomePageState extends State<HomePage> {
                                                 element.productItemList[0].id,
                                             price: element.currentPrice);
 
-                                        handler.insertCart(cart);
+                                        final cartProvider = Provider.of<CartProvider>(context, listen: false);
+                                        cartProvider.addToCart(cart);
                                       },
                                       child: Container(
                                         alignment: Alignment.center,
@@ -1155,7 +1155,8 @@ class _HomePageState extends State<HomePage> {
                                                 element.productItemList[0].id,
                                             price: element.currentPrice);
 
-                                        handler.insertCart(cart);
+                                        final cartProvider = Provider.of<CartProvider>(context, listen: false);
+                                        cartProvider.addToCart(cart);
                                       },
                                       child: Container(
                                         alignment: Alignment.center,
@@ -1441,7 +1442,8 @@ class _HomePageState extends State<HomePage> {
                                                 element.productItemList[0].id,
                                             price: element.currentPrice);
 
-                                        handler.insertCart(cart);
+                                        final cartProvider = Provider.of<CartProvider>(context, listen: false);
+                                        cartProvider.addToCart(cart);
                                       },
                                       child: Container(
                                         alignment: Alignment.center,

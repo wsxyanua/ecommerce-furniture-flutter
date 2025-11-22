@@ -7,6 +7,7 @@ import 'package:furniture_app_project/widgets/bottom_navy_bar.dart';
 import 'package:provider/provider.dart';
 import '../models/cart_model.dart';
 import '../models/favorite_model.dart';
+import '../provider/favorite_provider.dart';
 import '../services/DatabaseHandler.dart';
 
 class FavoritePage extends StatefulWidget {
@@ -19,21 +20,18 @@ class FavoritePage extends StatefulWidget {
 ProductProvider productProvider = ProductProvider();
 
 class _FavoritePageState extends State<FavoritePage> {
-  late DatabaseHandler handler;
   late List<Cart> listCart;
-  late List<Favorite> listFavorite;
 
   @override
   void initState() {
     super.initState();
-    handler = DatabaseHandler();
   }
 
   @override
   Widget build(BuildContext context) {
     productProvider = Provider.of<ProductProvider>(context);
-
-    listFavorite = handler.getListFavorite;
+    final favoriteProvider = Provider.of<FavoriteProvider>(context);
+    final listFavorite = favoriteProvider.favorites;
 
     return Scaffold(
       backgroundColor: const Color(0xfff2f9fe),
@@ -174,10 +172,8 @@ class _FavoritePageState extends State<FavoritePage> {
                               IconButton(
                                   padding: const EdgeInsets.all(5),
                                   onPressed: () {
-                                    setState(() {
-                                      handler.deleteFavorite(
-                                          listFavorite[index].idFavorite!);
-                                    });
+                                    final favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
+                                    favoriteProvider.removeFavorite(listFavorite[index]);
                                   },
                                   icon: Container(
                                     width: 50,
@@ -240,7 +236,7 @@ class _FavoritePageState extends State<FavoritePage> {
   }
 
   void getLFavorite() {
-    handler = DatabaseHandler();
+    final favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
     showDialog(
         context: context,
         builder: (_) {
@@ -262,7 +258,7 @@ class _FavoritePageState extends State<FavoritePage> {
         }
     );
 
-    listFavorite = handler.getListFavorite;
+    favoriteProvider.loadFavorites();
 
     Navigator.pop(context);
   }

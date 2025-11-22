@@ -1,8 +1,10 @@
 import 'package:furniture_app_project/provider/filter_provider.dart';
 import 'package:furniture_app_project/screens/welcome.dart';
 import 'provider/banner_provider.dart';
+import 'provider/cart_provider.dart';
 import 'provider/category_provider.dart';
 import 'provider/country_city_provider.dart';
+import 'provider/favorite_provider.dart';
 import 'provider/order_provider.dart';
 import 'provider/product_provider.dart';
 import 'provider/user_provider.dart';
@@ -48,6 +50,12 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<FilterProvider>(
           create: (context) => FilterProvider(),
+        ),
+        ChangeNotifierProvider<CartProvider>(
+          create: (context) => CartProvider(),
+        ),
+        ChangeNotifierProvider<FavoriteProvider>(
+          create: (context) => FavoriteProvider(),
         ),
       ],
       child: MaterialApp(

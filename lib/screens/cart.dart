@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/cart_model.dart';
+import '../provider/cart_provider.dart';
 import '../provider/product_provider.dart';
 import '../services/DatabaseHandler.dart';
 import '../widgets/bottom_navy_bar.dart';
@@ -18,20 +19,16 @@ class CartPage extends StatefulWidget {
 ProductProvider productProvider = ProductProvider();
 
 class _CartPageState extends State<CartPage> {
-  late DatabaseHandler handler;
-  late List<Cart> listCart;
-
   @override
   void initState() {
     super.initState();
-    handler = DatabaseHandler();
   }
 
   @override
   Widget build(BuildContext context) {
     productProvider = Provider.of<ProductProvider>(context);
-    //handler.retrieveCarts();
-    listCart = handler.getListCart;
+    final cartProvider = Provider.of<CartProvider>(context);
+    final listCart = cartProvider.cartItems;
     return Scaffold(
       backgroundColor: const Color(0xfff2f9fe),
       appBar: AppBar(
@@ -81,7 +78,8 @@ class _CartPageState extends State<CartPage> {
               ),
               key: ValueKey<int>(listCart[index].idCart!),
               onDismissed: (DismissDirection direction) {
-                deleteCart(listCart[index].idCart!);
+                final cartProvider = Provider.of<CartProvider>(context, listen: false);
+                cartProvider.removeFromCart(listCart[index]);
               },
               child: Container(
                 width: MediaQuery.of(context).size.width,
@@ -240,11 +238,6 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  void deleteCart(int idCart) {
-    handler.deleteCart(idCart);
-  }
-
-
   Widget getCFooter() {
     return Container(
       height: MediaQuery.of(context).size.height / 3,
@@ -397,14 +390,17 @@ class _CartPageState extends State<CartPage> {
   }
 
   void updateUpQuantity(int idCart, int quantity) {
-    handler.updateCart(idCart, quantity + 1);
+    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+    cartProvider.updateQuantity(idCart, quantity + 1);
   }
 
   void updateDownQuantity(int idCart, int quantity) {
+    final cartProvider = Provider.of<CartProvider>(context, listen: false);
     if (quantity == 1) {
-      handler.deleteCart(idCart);
+      final cart = cartProvider.cartItems.firstWhere((c) => c.idCart == idCart);
+      cartProvider.removeFromCart(cart);
     } else {
-      handler.updateCart(idCart, quantity - 1);
+      cartProvider.updateQuantity(idCart, quantity - 1);
     }
   }
 }

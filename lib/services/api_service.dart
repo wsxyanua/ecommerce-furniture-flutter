@@ -6,6 +6,8 @@ import '../models/banner_model.dart';
 import '../models/category_model.dart';
 import '../models/filter_model.dart';
 import '../models/order_model.dart';
+import '../models/cart_model.dart';
+import '../models/favorite_model.dart';
 
 class ApiService {
   ApiService._internal();
@@ -31,8 +33,29 @@ class ApiService {
   }
 
   // PRODUCTS
-  Future<List<Product>> fetchProducts({int skip = 0, int limit = 20}) async {
-    final res = await _dio.get('/products', queryParameters: {'skip': skip, 'limit': limit});
+  Future<List<Product>> fetchProducts({
+    int skip = 0,
+    int limit = 20,
+    String? name,
+    String? categoryId,
+    double? minPrice,
+    double? maxPrice,
+    String sortBy = 'timestamp',
+    String order = 'desc',
+  }) async {
+    final queryParams = <String, dynamic>{
+      'skip': skip,
+      'limit': limit,
+    };
+    
+    if (name != null) queryParams['name'] = name;
+    if (categoryId != null) queryParams['category_id'] = categoryId;
+    if (minPrice != null) queryParams['min_price'] = minPrice;
+    if (maxPrice != null) queryParams['max_price'] = maxPrice;
+    queryParams['sort_by'] = sortBy;
+    queryParams['order'] = order;
+    
+    final res = await _dio.get('/products', queryParameters: queryParams);
     if (res.statusCode == 200) {
       final data = res.data as List;
       return data.map((e) => Product.fromJson(e as Map<String, dynamic>)).toList();
@@ -46,6 +69,42 @@ class ApiService {
       return Product.fromJson(res.data as Map<String, dynamic>);
     }
     return null;
+  }
+
+  Future<List<Product>> fetchNewArrivals({int limit = 10}) async {
+    final res = await _dio.get('/products/special/new-arrivals', queryParameters: {'limit': limit});
+    if (res.statusCode == 200) {
+      final data = res.data as List;
+      return data.map((e) => Product.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  Future<List<Product>> fetchTopSeller({int limit = 10}) async {
+    final res = await _dio.get('/products/special/top-seller', queryParameters: {'limit': limit});
+    if (res.statusCode == 200) {
+      final data = res.data as List;
+      return data.map((e) => Product.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  Future<List<Product>> fetchBestReview({int limit = 10}) async {
+    final res = await _dio.get('/products/special/best-review', queryParameters: {'limit': limit});
+    if (res.statusCode == 200) {
+      final data = res.data as List;
+      return data.map((e) => Product.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  Future<List<Product>> fetchDiscount({int limit = 20}) async {
+    final res = await _dio.get('/products/special/discount', queryParameters: {'limit': limit});
+    if (res.statusCode == 200) {
+      final data = res.data as List;
+      return data.map((e) => Product.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    return [];
   }
 
   // USERS
@@ -145,8 +204,11 @@ class ApiService {
   }
 
   // BANNERS
-  Future<List<Banner1>> fetchBanners() async {
-    final res = await _dio.get('/banners');
+  Future<List<Banner1>> fetchBanners({int skip = 0, int limit = 50, String? status}) async {
+    final queryParams = <String, dynamic>{'skip': skip, 'limit': limit};
+    if (status != null) queryParams['status'] = status;
+    
+    final res = await _dio.get('/banners', queryParameters: queryParams);
     if (res.statusCode == 200) {
       final data = res.data as List;
       return data.map((e)=> Banner1.fromJson(e as Map<String,dynamic>)).toList();
@@ -155,8 +217,8 @@ class ApiService {
   }
 
   // CATEGORIES
-  Future<List<Category>> fetchCategories() async {
-    final res = await _dio.get('/categories');
+  Future<List<Category>> fetchCategories({int skip = 0, int limit = 100}) async {
+    final res = await _dio.get('/categories', queryParameters: {'skip': skip, 'limit': limit});
     if (res.statusCode == 200) {
       final data = res.data as List;
       return data.map((e)=> Category.fromJson(e as Map<String,dynamic>)).toList();
@@ -165,15 +227,13 @@ class ApiService {
   }
 
   // FILTER (assume single filter config)
-  Future<FilterModel?> fetchFilter() async {
-    final res = await _dio.get('/filters');
+  Future<FilterModel?> fetchFilter({String? category}) async {
+    final queryParams = <String, dynamic>{};
+    if (category != null) queryParams['category'] = category;
+    
+    final res = await _dio.get('/filters', queryParameters: queryParams);
     if (res.statusCode == 200) {
-      if (res.data is List) {
-        final list = res.data as List;
-        if (list.isNotEmpty) {
-          return FilterModel.fromJson(list.first as Map<String,dynamic>);
-        }
-      } else if (res.data is Map<String,dynamic>) {
+      if (res.data is Map<String,dynamic>) {
         return FilterModel.fromJson(res.data as Map<String,dynamic>);
       }
     }
@@ -189,6 +249,144 @@ class ApiService {
         final m = e as Map<String,dynamic>;
         return Country(name: m['name'] ?? '', id: m['id'] ?? '', city: (m['city'] as List?)?.map((e)=> e.toString()).toList() ?? []);
       }).toList();
+    }
+    return [];
+  }
+
+  // CART
+  Future<List<Cart>> fetchCart() async {
+    final res = await _dio.get('/cart');
+    if (res.statusCode == 200) {
+      final data = res.data as List;
+      return data.map((e) => Cart.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  Future<Cart?> addToCart(Cart item) async {
+    final res = await _dio.post('/cart', data: jsonEncode({
+      'product_id': item.idProduct,
+      'name': item.nameProduct,
+      'img': item.imgProduct,
+      'color': item.color,
+      'quantity': item.quantity,
+      'price': item.price,
+    }));
+    if (res.statusCode == 200) {
+      return Cart.fromJson(res.data as Map<String, dynamic>);
+    }
+    return null;
+  }
+
+  Future<bool> removeFromCart(int itemId) async {
+    final res = await _dio.delete('/cart/$itemId');
+    return res.statusCode == 200;
+  }
+
+  Future<Cart?> updateCartQuantity(int itemId, int quantity) async {
+    final res = await _dio.patch('/cart/$itemId', data: jsonEncode({'quantity': quantity}));
+    if (res.statusCode == 200) {
+      return Cart.fromJson(res.data as Map<String, dynamic>);
+    }
+    return null;
+  }
+
+  // FAVORITES
+  Future<List<Favorite>> fetchFavorites() async {
+    final res = await _dio.get('/favorites');
+    if (res.statusCode == 200) {
+      final data = res.data as List;
+      return data.map((e) => Favorite.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  Future<Favorite?> addFavorite(Favorite item) async {
+    final res = await _dio.post('/favorites', data: jsonEncode({
+      'product_id': item.idProduct,
+      'name': item.nameProduct,
+      'img': item.imgProduct,
+      'price': item.price.toString(),
+    }));
+    if (res.statusCode == 200) {
+      return Favorite.fromJson(res.data as Map<String, dynamic>);
+    }
+    return null;
+  }
+
+  Future<bool> removeFavorite(int itemId) async {
+    final res = await _dio.delete('/favorites/$itemId');
+    return res.statusCode == 200;
+  }
+
+  // REVIEWS
+  Future<List<Review>> fetchProductReviews(String productId, {int skip = 0, int limit = 20, String sortBy = 'created_at', String order = 'desc'}) async {
+    final res = await _dio.get('/products/$productId/reviews', queryParameters: {
+      'skip': skip,
+      'limit': limit,
+      'sort_by': sortBy,
+      'order': order,
+    });
+    if (res.statusCode == 200) {
+      final data = res.data as List;
+      return data.map((e) => Review.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    return [];
+  }
+
+  Future<Review?> createReview({
+    required String productId,
+    String? orderId,
+    required double star,
+    String? message,
+    List<String>? img,
+    Map<String, dynamic>? service,
+  }) async {
+    final payload = {
+      'product_id': productId,
+      if (orderId != null) 'order_id': orderId,
+      'star': star,
+      if (message != null) 'message': message,
+      if (img != null) 'img': img,
+      if (service != null) 'service': service,
+    };
+    final res = await _dio.post('/products/$productId/reviews', data: jsonEncode(payload));
+    if (res.statusCode == 201) {
+      return Review.fromJson(res.data as Map<String, dynamic>);
+    }
+    return null;
+  }
+
+  Future<Review?> updateReview({
+    required String reviewId,
+    double? star,
+    String? message,
+    List<String>? img,
+    Map<String, dynamic>? service,
+  }) async {
+    final payload = {
+      if (star != null) 'star': star,
+      if (message != null) 'message': message,
+      if (img != null) 'img': img,
+      if (service != null) 'service': service,
+    };
+    final res = await _dio.patch('/reviews/$reviewId', data: jsonEncode(payload));
+    if (res.statusCode == 200) {
+      return Review.fromJson(res.data as Map<String, dynamic>);
+    }
+    return null;
+  }
+
+  Future<bool> deleteReview(String reviewId) async {
+    final res = await _dio.delete('/reviews/$reviewId');
+    return res.statusCode == 204;
+  }
+
+  Future<List<Review>> fetchMyReviews({int skip = 0, int limit = 20}) async {
+    final res = await _dio.get('/users/me/reviews', queryParameters: {'skip': skip, 'limit': limit});
+    if (res.statusCode == 200) {
+      final data = res.data as List;
+      return data.map((e) => Review.fromJson(e as Map<String, dynamic>)).toList();
     }
     return [];
   }

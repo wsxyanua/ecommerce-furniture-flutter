@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.routes import products
-from app.routes import auth, users, cart, favorite, orders, banners, categories, filters, countries
+from app.routes import auth, users, cart, favorite, orders, banners, categories, filters, countries, reviews
 from app.db import init_db
 
 app = FastAPI(title="Furniture Backend")
@@ -22,6 +22,7 @@ app.include_router(banners.router, prefix="/banners", tags=["banners"])
 app.include_router(categories.router, prefix="/categories", tags=["categories"])
 app.include_router(filters.router, prefix="/filters", tags=["filters"])
 app.include_router(countries.router, prefix="/countries", tags=["countries"])
+app.include_router(reviews.router, tags=["reviews"])
 
 
 @app.get("/")

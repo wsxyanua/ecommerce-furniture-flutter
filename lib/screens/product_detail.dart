@@ -11,7 +11,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/cart_model.dart';
 import '../models/product_model.dart';
-import '../services/DatabaseHandler.dart';
+import '../provider/cart_provider.dart';
+import '../provider/favorite_provider.dart';
 import 'package:badges/badges.dart' as badges;
 
 class ProductDetailPage extends StatefulWidget {
@@ -27,7 +28,6 @@ UserProvider userProvider = UserProvider();
 
 class _ProductDetailPageState extends State<ProductDetailPage>
     with TickerProviderStateMixin {
-  late DatabaseHandler handler;
   late Cart cart;
   late Favorite favorite;
 
@@ -39,7 +39,6 @@ class _ProductDetailPageState extends State<ProductDetailPage>
   @override
   void initState() {
     number = 0;
-    handler = DatabaseHandler();
     super.initState();
   }
 
@@ -402,7 +401,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                       idProduct: widget.productID.id,
                       price: widget.productID.currentPrice);
 
-                  handler.insertFavorite(fav);
+                  final favProvider = Provider.of<FavoriteProvider>(context, listen: false);
+                  favProvider.addFavorite(fav);
 
                   Navigator.pop(context);
                 },
@@ -413,7 +413,15 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                       borderRadius: BorderRadius.all(Radius.circular(25)),
                       color: Colors.white,
                     ),
-                    child: getIconFavorite(widget.productID.id, handler.getListFavorite,widget.productID),
+                    child: Consumer<FavoriteProvider>(
+                      builder: (context, favProvider, child) {
+                        final isFav = favProvider.isFavorite(widget.productID.id);
+                        return Icon(
+                          isFav ? Icons.favorite : Icons.favorite_border_outlined,
+                          color: const Color(0xff81221e),
+                        );
+                      },
+                    ),
                 ),
               ),
             ),
@@ -430,8 +438,8 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                       quantity: 1, idProduct: productItem.id, price:widget.productID.currentPrice
                   );
 
-                  handler.insertCart(cartNew);
-                  //handler.retrieveCarts();
+                  final cartProvider = Provider.of<CartProvider>(context, listen: false);
+                  cartProvider.addToCart(cartNew);
                 },
                 child: Container(
                     width: 50,

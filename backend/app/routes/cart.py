@@ -38,3 +38,19 @@ def delete_cart(item_id: int, db: Session = Depends(get_db), current_user = Depe
     db.delete(ci)
     db.commit()
     return {'deleted': True}
+
+
+@router.patch('/{item_id}')
+def update_cart(item_id: int, update_data: dict, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    ci = db.query(CartItem).filter(CartItem.id == item_id, CartItem.user_id == current_user.id).first()
+    if not ci:
+        raise HTTPException(status_code=404, detail='Cart item not found')
+    
+    if 'quantity' in update_data:
+        ci.quantity = update_data['quantity']
+    if 'color' in update_data:
+        ci.color = update_data['color']
+    
+    db.commit()
+    db.refresh(ci)
+    return ci.to_dict()
